@@ -6,8 +6,8 @@ all_stocks = np.loadtxt("./data/metadata.tsv", dtype=str)
 
 # stock_i = ["000002.SZ", "000001.SZ", "000004.SZ"]
 stock_i = all_stocks[1:100]
-start_date = "2016-01-04"
-end_date = "2016-01-04"
+start_date = "2016-03-01"
+end_date = "2016-03-01"
 
 print(",".join(stock_i))
 
