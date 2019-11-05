@@ -9,9 +9,7 @@ def get_macd(filename):
     return df
 
 
-
 if __name__ == "__main__":
-
 
     # stocks: 3500
     stocks = np.loadtxt("./data/metadata.tsv", dtype=str)
@@ -19,7 +17,7 @@ if __name__ == "__main__":
 
     # stock embeddings:
     # 3500 * 32
-    stock_embeddings=np.loadtxt("./data/final_embeddings",delimiter=",")
+    stock_embeddings = np.loadtxt("./data/final_embeddings",delimiter=",")
 
     indicator_macd = get_macd("./data/indicators.csv")
 
