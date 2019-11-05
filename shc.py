@@ -30,6 +30,7 @@ def load_stock_data():
 
 
 def custom_loss(y_true, y_pred):
+
     pass
 
 
@@ -43,7 +44,7 @@ stock_embedding_shape = stock_embeddings.shape
 embedding_layer = Embedding(stock_embedding_shape[0],
                             stock_embedding_shape[1],
                             weights=[stock_embeddings],
-                            input_length=3,             # TODO 3??
+                            input_length=3,             # TODO input_lenght=3 ??
                             trainable=False)
 model.add(embedding_layer)
 
@@ -54,4 +55,6 @@ model.add(conv1d_layer)
 flatten_layer = Flatten()
 model.add(flatten_layer)
 model.add(Activation('softmax'))
-# model.compile(loss=custom_loss,)
+
+model.compile(loss=custom_loss,)
+model.fit(x,y)  # x -> 一行id, y
