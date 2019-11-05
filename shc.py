@@ -16,13 +16,14 @@ def load_stock_data():
     macd = np.loadtxt("./data/macd.txt", dtype=float)
 
     revenue_df=pd.read_csv("./data/revenue.csv", encoding='utf-8')[['instrument', 'pct_change_m']]
-    revenue_dict = revenue_df.set_index('instrument').T.to_dict('index')
+    revenue_dict = revenue_df.set_index('instrument').T.to_dict('index')['pct_change_m']
     revenue = []
     for i in stocks:
         if i in revenue_dict.keys():
             revenue.append(revenue_dict[i])
         else:
             revenue.append(0)
+    print("revenue", revenue)
     print("stocks loaded", type(stocks), len(stocks))
     print("embeddings loaded", type(embeddings), len(embeddings), " shape:", embeddings.shape)
     return stocks, macd, revenue, embeddings
