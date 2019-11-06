@@ -10,6 +10,7 @@ import keras.backend as K
 import pandas as pd
 
 
+
 def load_stock_data():
     stocks = np.loadtxt("./data/stock_index.tsv", dtype=str)
     embeddings = np.loadtxt("./data/final_embeddings",delimiter=",")
@@ -41,10 +42,10 @@ stock_embedding_shape = stock_embeddings.shape
 
 
 #embedding layer
-embedding_layer = Embedding(stock_embedding_shape[0],
-                            stock_embedding_shape[1],
+embedding_layer = Embedding(stock_embedding_shape[0], # 3500
+                            stock_embedding_shape[1], # 32
                             weights=[stock_embeddings],
-                            input_length=3,             # TODO input_lenght=3 ??
+                            input_length=stock_embedding_shape[0], # 3500
                             trainable=False)
 model.add(embedding_layer)
 
@@ -57,4 +58,6 @@ model.add(flatten_layer)
 model.add(Activation('softmax'))
 
 model.compile(loss=custom_loss,)
-model.fit(x,y)  # x -> 一行id, y
+
+
+model.fit(x_train, y_train, epochs=10)
