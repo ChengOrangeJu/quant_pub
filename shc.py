@@ -8,6 +8,8 @@ from keras.layers import Activation
 from keras.layers import Lambda
 import keras.backend as K
 import pandas as pd
+import tensorflow as tf
+from keras.initializers import Constant
 
 
 
@@ -27,15 +29,26 @@ def load_stock_data():
     print("revenue", revenue)
     print("stocks loaded", type(stocks), len(stocks))
     print("embeddings loaded", type(embeddings), len(embeddings), " shape:", embeddings.shape)
-    return stocks, macd, revenue, embeddings
+    return stocks, macd, np.asarray(revenue), embeddings
 
 
 def custom_loss(y_true, y_pred):
+    x = y_true
+    y = y_pred
+    mx = K.mean(x)
+    my = K.mean(y)
+    xm, ym = x-mx, y-my
+    r_num = K.sum(tf.multiply(xm,ym))
+    r_den = K.sqrt(tf.multiply(K.sum(K.square(xm)), K.sum(K.square(ym))))
+    r = r_num / r_den
 
-    pass
+    r = K.maximum(K.minimum(r, 1.0), -1.0)
+    return 1 - K.square(r)
 
 
 stocks, macd, revenue, stock_embeddings = load_stock_data()
+
+print("revenue", type(revenue), revenue)
 
 model = Sequential()
 stock_embedding_shape = stock_embeddings.shape
@@ -44,7 +57,8 @@ stock_embedding_shape = stock_embeddings.shape
 #embedding layer
 embedding_layer = Embedding(stock_embedding_shape[0], # 3500
                             stock_embedding_shape[1], # 32
-                            weights=[stock_embeddings],
+                            embeddings_initializer=Constant(stock_embeddings),
+                            # weights=[stock_embeddings],
                             input_length=stock_embedding_shape[0], # 3500
                             trainable=False)
 model.add(embedding_layer)
@@ -57,7 +71,5 @@ flatten_layer = Flatten()
 model.add(flatten_layer)
 model.add(Activation('softmax'))
 
-model.compile(loss=custom_loss,)
-
-
-model.fit(x_train, y_train, epochs=10)
+model.compile(loss=custom_loss, optimizer='adam')
+model.fit(stocks, revenue, epochs=10)
