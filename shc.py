@@ -12,7 +12,6 @@ import tensorflow as tf
 from keras.initializers import Constant
 
 
-
 def load_stock_data():
     stocks = np.loadtxt("./data/stock_index.tsv", dtype=str)
     embeddings = np.loadtxt("./data/final_embeddings",delimiter=",")
@@ -26,17 +25,25 @@ def load_stock_data():
             revenue.append(revenue_dict[i])
         else:
             revenue.append(0)
-    print("revenue", revenue)
-    print("stocks loaded", type(stocks), len(stocks))
-    print("embeddings loaded", type(embeddings), len(embeddings), " shape:", embeddings.shape)
-    return stocks, macd, np.asarray(revenue), embeddings
+    # print("revenue", revenue)
+    # print("stocks loaded", type(stocks), len(stocks))
+    # print("embeddings loaded", type(embeddings), len(embeddings), " shape:", embeddings.shape)
+    return stocks, np.asarray([np.nan_to_num(macd)]), np.asarray([revenue]), embeddings
 
 
 def custom_loss(y_true, y_pred):
+    y_true = K.print_tensor(y_true, message='y_true = ')
+    y_pred = K.print_tensor(y_pred, message='y_pred = ')
+
     x = y_true
-    y = y_pred
+    y = y_pred * macd
+    y = K.print_tensor(y, message='y*macd = ')
+
     mx = K.mean(x)
+    mx = K.print_tensor(mx,message="mx = ")
     my = K.mean(y)
+    my = K.print_tensor(my,message="my = ")
+
     xm, ym = x-mx, y-my
     r_num = K.sum(tf.multiply(xm,ym))
     r_den = K.sqrt(tf.multiply(K.sum(K.square(xm)), K.sum(K.square(ym))))
@@ -46,13 +53,14 @@ def custom_loss(y_true, y_pred):
     return 1 - K.square(r)
 
 
+
 stocks, macd, revenue, stock_embeddings = load_stock_data()
+print("macd", type(macd), macd)
 
 print("revenue", type(revenue), revenue)
 
 model = Sequential()
 stock_embedding_shape = stock_embeddings.shape
-
 
 #embedding layer
 embedding_layer = Embedding(stock_embedding_shape[0], # 3500
@@ -70,6 +78,12 @@ model.add(conv1d_layer)
 flatten_layer = Flatten()
 model.add(flatten_layer)
 model.add(Activation('softmax'))
+# model.compile(loss=custom_loss, optimizer='adam')
+model.compile(loss=custom_loss, optimizer=tf.train.AdamOptimizer())
+stocks_indexed = np.asarray([list(range(0, 3500))])
 
-model.compile(loss=custom_loss, optimizer='adam')
-model.fit(stocks, revenue, epochs=10)
+# print("stocks_indexed", type(stocks_indexed), stocks_indexed)
+# print("mean:", np.mean(revenue[0]))
+print("macd", type(macd), macd)
+
+model.fit(stocks_indexed, revenue, epochs=1000)
