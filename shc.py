@@ -9,6 +9,7 @@ from keras.layers import Lambda
 import keras.backend as K
 import pandas as pd
 import tensorflow as tf
+import sys
 from keras.initializers import Constant
 
 
@@ -32,12 +33,11 @@ def load_stock_data():
 
 
 def custom_loss(y_true, y_pred):
-    y_true = K.print_tensor(y_true, message='y_true = ')
-    y_pred = K.print_tensor(y_pred, message='y_pred = ')
+
 
     x = y_true
     y = y_pred * macd
-    y = K.print_tensor(y, message='y*macd = ')
+    y = tf.Print(y, [y],'refactored indicator', summarize=4000)
 
     mx = K.mean(x)
     mx = K.print_tensor(mx,message="mx = ")
@@ -80,10 +80,14 @@ model.add(flatten_layer)
 model.add(Activation('softmax'))
 # model.compile(loss=custom_loss, optimizer='adam')
 model.compile(loss=custom_loss, optimizer=tf.train.AdamOptimizer())
+
 stocks_indexed = np.asarray([list(range(0, 3500))])
 
 # print("stocks_indexed", type(stocks_indexed), stocks_indexed)
 # print("mean:", np.mean(revenue[0]))
 print("macd", type(macd), macd)
 
-model.fit(stocks_indexed, revenue, epochs=1000)
+# model.fit(stocks_indexed, revenue, epochs=1000)
+model.fit(stocks_indexed, revenue, epochs=10)
+print("weight_J", model.layers[1].get_weights())
+model.summary()
